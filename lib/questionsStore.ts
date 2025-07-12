@@ -1,4 +1,28 @@
-let questions = globalThis._questions || [
+interface Answer {
+  id: number;
+  content: string;
+  author: string;
+  votes: number;
+  createdAt: string;
+}
+
+interface Question {
+  id: number;
+  title: string;
+  content: string;
+  author: string;
+  tags: string[];
+  votes: number;
+  answers: Answer[];
+  views: number;
+  createdAt: string;
+  isAnswered: boolean;
+  isBookmarked: boolean;
+  acceptedAnswerId?: number;
+  voters?: Array<{ user: string; vote: 'up' | 'down' }>;
+}
+
+let questions: Question[] = globalThis._questions || [
   {
     id: 1,
     title: 'How to implement authentication in Next.js with JWT?',
@@ -41,13 +65,14 @@ if (!globalThis._questions) {
   globalThis._nextId = nextId
 }
 
-function getNextId() {
+function getNextId(): number {
   globalThis._nextId = (globalThis._nextId || 3) + 1
   return globalThis._nextId - 1
 }
 
-function addQuestion(question) {
+function addQuestion(question: Question): void {
   globalThis._questions.push(question)
 }
 
-export { questions, getNextId, addQuestion } 
+export { questions, getNextId, addQuestion }
+export type { Question, Answer } 

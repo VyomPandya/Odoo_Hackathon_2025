@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { questions, getNextId, addQuestion } from '../../../lib/questionsStore'
+import { questions, getNextId, addQuestion, type Question } from '../../../lib/questionsStore'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -15,26 +15,26 @@ export async function POST(req: NextRequest) {
   const data = await req.json()
   // Voting on a question
   if (data.vote && data.user && data.questionId) {
-    const question = questions.find(q => q.id === data.questionId)
+    const question = questions.find((q: Question) => q.id === data.questionId)
     if (!question) {
       return NextResponse.json({ error: 'Question not found' }, { status: 404 })
     }
     if (!question.voters) question.voters = []
-    const existing = question.voters.find((v: any) => v.user === data.user)
+    const existing = question.voters.find((v: { user: string; vote: 'up' | 'down' }) => v.user === data.user)
     if (existing) {
       // Already voted, do not allow again
       return NextResponse.json({ error: 'Already voted' }, { status: 400 })
     }
     const voteValue = data.vote === 'up' ? 1 : -1
     question.votes = (question.votes || 0) + voteValue
-    question.voters.push({ user: data.user, vote: voteValue })
+    question.voters.push({ user: data.user, vote: data.vote })
     return NextResponse.json({ question })
   }
   const { title, content, tags, author } = data
   if (!title || !content || !author || !tags || !Array.isArray(tags) || tags.length === 0) {
     return NextResponse.json({ error: 'Missing fields or tags' }, { status: 400 })
   }
-  const question = {
+  const question: Question = {
     id: getNextId(),
     title,
     content,

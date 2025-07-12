@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { questions } from '../../../../lib/questionsStore'
+import { questions, type Question, type Answer } from '../../../../lib/questionsStore'
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const id = parseInt(params.id)
-  const question = questions.find(q => q.id === id)
+  const question = questions.find((q: Question) => q.id === id)
   if (!question) {
     return NextResponse.json({ error: 'Question not found' }, { status: 404 })
   }
@@ -17,14 +17,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const id = parseInt(params.id)
-  const question = questions.find(q => q.id === id)
+  const question = questions.find((q: Question) => q.id === id)
   if (!question) {
     return NextResponse.json({ error: 'Question not found' }, { status: 404 })
   }
   const data = await req.json()
   if (data.vote && data.answerId) {
     // Voting on an answer
-    const answer = question.answers.find((a: any) => a.id === data.answerId)
+    const answer = question.answers.find((a: Answer) => a.id === data.answerId)
     if (!answer) {
       return NextResponse.json({ error: 'Answer not found' }, { status: 404 })
     }
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (!content || !author) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
-  const answer = {
+  const answer: Answer = {
     id: question.answers.length + 1,
     content,
     author,
