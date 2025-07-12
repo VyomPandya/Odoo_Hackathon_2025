@@ -77,6 +77,9 @@ function getNextId(): number {
 }
 
 function addQuestion(question: Question): void {
+  if (!globalThis._questions) {
+    globalThis._questions = []
+  }
   globalThis._questions.push(question)
 }
 
