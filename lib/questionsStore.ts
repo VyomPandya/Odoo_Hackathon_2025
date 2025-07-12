@@ -1,3 +1,9 @@
+// Extend globalThis to include our custom properties
+declare global {
+  var _questions: Question[] | undefined;
+  var _nextId: number | undefined;
+}
+
 interface Answer {
   id: number;
   content: string;
