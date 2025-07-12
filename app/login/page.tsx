@@ -5,6 +5,7 @@ import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { authenticateUser, generateToken, setAuthToken } from '../../lib/auth'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../../lib/supabaseClient';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic'
@@ -51,6 +52,23 @@ export default function LoginPage() {
       [e.target.name]: e.target.value,
     })
   }
+
+  // Add Google sign-in handler
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+      if (error) {
+        setError('Google sign-in failed. Please try again.');
+      }
+      // On success, Supabase will redirect automatically
+    } catch (err) {
+      setError('Google sign-in failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -179,6 +197,7 @@ export default function LoginPage() {
 
             <div className="mt-6 flex justify-center">
               <button
+                type="button"
                 className="flex items-center gap-3 px-5 py-3 bg-white border w-auto mx-auto"
                 style={{
                   borderColor: '#d1d5db',
@@ -190,8 +209,10 @@ export default function LoginPage() {
                   fontSize: 16,
                   transition: 'background 0.2s',
                 }}
+                onClick={handleGoogleSignIn}
                 onMouseOver={e => (e.currentTarget.style.background = '#f7f7f7')}
                 onMouseOut={e => (e.currentTarget.style.background = '#fff')}
+                disabled={isLoading}
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" style={{ display: 'block' }} xmlns="http://www.w3.org/2000/svg">
                   <g>
