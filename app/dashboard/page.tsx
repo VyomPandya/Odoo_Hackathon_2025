@@ -208,10 +208,10 @@ export default function DashboardPage() {
   ]
 
   const tabs = [
-    { id: 'all', label: 'All Questions', count: 156 },
-    { id: 'unanswered', label: 'Unanswered', count: 23 },
-    { id: 'answered', label: 'Answered', count: 133 },
-    { id: 'trending', label: 'Trending', count: 8 }
+    { id: 'all', label: 'All Questions' },
+    { id: 'unanswered', label: 'Unanswered' },
+    { id: 'answered', label: 'Answered' },
+    { id: 'trending', label: 'Trending' }
   ]
 
   const [answerContent, setAnswerContent] = useState('')
@@ -290,6 +290,15 @@ export default function DashboardPage() {
     .slice(0, 5)
 
   const hasVoted = (question: any) => question.voters && user && question.voters.some((v: any) => v.user === user.name)
+
+  // Add filteredQuestions based on activeTab
+  const filteredQuestions = questions.filter((q) => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'unanswered') return !q.isAnswered && (!q.answers || q.answers.length === 0);
+    if (activeTab === 'answered') return q.isAnswered || (q.answers && q.answers.length > 0);
+    if (activeTab === 'trending') return q.votes > 10; // Adjust trending logic as needed
+    return true;
+  });
 
   return (
     <ProtectedRoute>
@@ -400,9 +409,6 @@ export default function DashboardPage() {
                     }`}
                   >
                     {tab.label}
-                    <span className="ml-2 text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">
-                      {tab.count}
-                    </span>
                   </button>
                 ))}
               </div>
@@ -414,7 +420,7 @@ export default function DashboardPage() {
                 <div className="text-center text-red-500 py-10">{error}</div>
               ) : (
                 <div className="space-y-4">
-                  {questions.map((question) => (
+                  {filteredQuestions.map((question) => (
                     <div key={question.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-shadow w-full">
                       <div className="flex gap-6">
                         {/* Vote Section */}
