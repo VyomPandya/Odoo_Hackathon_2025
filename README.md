@@ -1,4 +1,4 @@
-# Odoo_Hackathon_2025
+# Odoo Hackathon 2025
 
 ## 🧩 Problem Statement
 Problem Statement 2 
