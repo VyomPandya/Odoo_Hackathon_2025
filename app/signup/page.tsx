@@ -51,7 +51,7 @@ export default function SignupPage() {
     }
 
     try {
-      const user = registerUser(formData.name, formData.email, formData.password)
+      const user = await registerUser(formData.name, formData.email, formData.password)
       
       if (user) {
         const token = generateToken(user)
@@ -59,7 +59,7 @@ export default function SignupPage() {
         login(user)
         router.push('/dashboard')
       } else {
-        setError('Email already exists. Please use a different email or try logging in.')
+        setError('Email already exists or registration failed. Please use a different email or try logging in.')
       }
     } catch (err) {
       console.error('Registration error:', err)

@@ -1,5 +1,6 @@
 import jwt from 'jwt-simple';
 import Cookies from 'js-cookie';
+import { supabase } from './supabaseClient';
 
 const JWT_SECRET = 'your-super-secret-jwt-key-change-this-in-production';
 const TOKEN_EXPIRY = 7 * 24 * 60 * 60; // 7 days in seconds
@@ -75,28 +76,35 @@ export const getCurrentUser = (): User | null => {
   return user || null;
 };
 
-export const authenticateUser = (email: string, password: string): User | null => {
-  const users = getStoredUsers();
-  const user = users.find(u => u.email === email && u.password === password);
-  if (user) {
-    return user;
-  }
-  return null;
-};
-
-export const registerUser = (name: string, email: string, password: string): User | null => {
-  const users = getStoredUsers();
-  const existingUser = users.find(u => u.email === email);
-  if (existingUser) {
+export const authenticateUser = async (email: string, password: string): Promise<User | null> => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error || !data.user) {
     return null;
   }
-  const newUser: User = {
-    id: (users.length + 1).toString(),
-    name,
-    email,
-    password
+  // Fetch user profile data if you have a users table (optional)
+  return {
+    id: data.user.id,
+    name: data.user.user_metadata?.name || '',
+    email: data.user.email || '',
+    password: '', // Do not expose password
   };
-  users.push(newUser);
-  saveUsers(users);
-  return newUser;
+};
+
+export const registerUser = async (name: string, email: string, password: string): Promise<User | null> => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { name },
+    },
+  });
+  if (error || !data.user) {
+    return null;
+  }
+  return {
+    id: data.user.id,
+    name: name,
+    email: data.user.email || '',
+    password: '', // Do not expose password
+  };
 }; 

@@ -27,7 +27,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const user = authenticateUser(formData.email, formData.password)
+      const user = await authenticateUser(formData.email, formData.password)
       
       if (user) {
         const token = generateToken(user)
