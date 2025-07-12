@@ -30,9 +30,6 @@ import 'react-quill/dist/quill.snow.css'
 import dynamic from 'next/dynamic'
 import { Fragment } from 'react';
 
-// Force dynamic rendering for this page
-export const dynamicFlag = 'force-dynamic'
-
 // Move ReactQuill definition outside the component to avoid re-creation
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 
