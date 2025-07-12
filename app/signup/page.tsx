@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
+import { registerUser, generateToken, setAuthToken } from '../../lib/auth'
+import { useRouter } from 'next/navigation'
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic'
@@ -9,6 +12,8 @@ export const dynamic = 'force-dynamic'
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,10 +21,52 @@ export default function SignupPage() {
     confirmPassword: '',
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login } = useAuth()
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle signup logic here
-    console.log('Signup attempt:', formData)
+    setIsLoading(true)
+    setError('')
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      setIsLoading(false)
+      return
+    }
+
+    // Validate password requirements
+    const passwordRequirements = [
+      formData.password.length >= 8,
+      /[A-Z]/.test(formData.password),
+      /[a-z]/.test(formData.password),
+      /\d/.test(formData.password),
+    ]
+
+    if (!passwordRequirements.every(req => req)) {
+      setError('Password does not meet requirements')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const user = registerUser(formData.name, formData.email, formData.password)
+      
+      if (user) {
+        const token = generateToken(user)
+        setAuthToken(token)
+        login(user)
+        router.push('/dashboard')
+      } else {
+        setError('Email already exists. Please use a different email or try logging in.')
+      }
+    } catch (err) {
+      console.error('Registration error:', err)
+      setError('An error occurred during registration. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +109,12 @@ export default function SignupPage() {
 
         {/* Signup Form */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+          
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
@@ -79,6 +132,7 @@ export default function SignupPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   placeholder="Enter your full name"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -99,6 +153,7 @@ export default function SignupPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   placeholder="Enter your email"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -119,11 +174,13 @@ export default function SignupPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-10 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   placeholder="Create a password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -168,11 +225,13 @@ export default function SignupPage() {
                       : 'border-slate-300'
                   }`}
                   placeholder="Confirm your password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  disabled={isLoading}
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -189,6 +248,7 @@ export default function SignupPage() {
                 type="checkbox"
                 required
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded mt-1"
+                disabled={isLoading}
               />
               <label htmlFor="terms" className="ml-2 block text-sm text-slate-700">
                 I agree to the{' '}
@@ -205,9 +265,10 @@ export default function SignupPage() {
             <div>
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-xl text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Create account
+                {isLoading ? 'Creating account...' : 'Create account'}
               </button>
             </div>
           </form>

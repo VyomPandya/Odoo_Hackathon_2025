@@ -1,15 +1,28 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, MessageCircle, Users, TrendingUp, ArrowRight, Menu, X, ChevronRight, Star, BookOpen, Zap } from 'lucide-react'
+import { Search, MessageCircle, Users, TrendingUp, ArrowRight, Menu, X, Star, ChevronRight, User, LogOut } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { user, logout } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
+
+  const handleDashboard = () => {
+    router.push('/dashboard')
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 z-50">
+      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -22,7 +35,7 @@ export default function HomePage() {
             
             {/* Desktop Navigation */}
             <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-8">
+              <div className="ml-10 flex items-baseline space-x-4">
                 <a href="#features" className="text-slate-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
                   Features
                 </a>
@@ -37,12 +50,38 @@ export default function HomePage() {
 
             <div className="hidden md:block">
               <div className="ml-4 flex items-center space-x-4">
-                <a href="/login" className="text-slate-600 hover:text-blue-600 px-4 py-2 text-sm font-medium transition-colors">
-                  Sign In
-                </a>
-                <a href="/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Get Started
-                </a>
+                {user ? (
+                  <>
+                    <button
+                      onClick={handleDashboard}
+                      className="text-slate-600 hover:text-blue-600 px-4 py-2 text-sm font-medium transition-colors"
+                    >
+                      Dashboard
+                    </button>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User size={16} className="text-blue-600" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">{user.name}</span>
+                      <button
+                        onClick={handleLogout}
+                        className="text-slate-600 hover:text-red-600 px-2 py-1 transition-colors"
+                        title="Logout"
+                      >
+                        <LogOut size={16} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <a href="/login" className="text-slate-600 hover:text-blue-600 px-4 py-2 text-sm font-medium transition-colors">
+                      Sign In
+                    </a>
+                    <a href="/signup" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                      Get Started
+                    </a>
+                  </>
+                )}
               </div>
             </div>
 
@@ -72,12 +111,37 @@ export default function HomePage() {
                 Contact
               </a>
               <div className="pt-4 space-y-2">
-                <a href="/login" className="text-slate-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
-                  Sign In
-                </a>
-                <a href="/signup" className="bg-blue-600 hover:bg-blue-700 text-white block px-3 py-2 rounded-md text-base font-medium text-center">
-                  Get Started
-                </a>
+                {user ? (
+                  <>
+                    <button
+                      onClick={handleDashboard}
+                      className="text-slate-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+                    >
+                      Dashboard
+                    </button>
+                    <div className="flex items-center space-x-2 px-3 py-2">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User size={14} className="text-blue-600" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">{user.name}</span>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="text-red-600 hover:text-red-700 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <a href="/login" className="text-slate-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
+                      Sign In
+                    </a>
+                    <a href="/signup" className="bg-blue-600 hover:bg-blue-700 text-white block px-3 py-2 rounded-md text-base font-medium text-center">
+                      Get Started
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -125,10 +189,20 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/signup" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl text-lg inline-flex items-center justify-center transition-colors shadow-lg">
-                Start Asking Questions
-                <ArrowRight className="ml-2" size={20} />
-              </a>
+              {user ? (
+                <button
+                  onClick={handleDashboard}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl text-lg inline-flex items-center justify-center transition-colors shadow-lg"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="ml-2" size={20} />
+                </button>
+              ) : (
+                <a href="/signup" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl text-lg inline-flex items-center justify-center transition-colors shadow-lg">
+                  Start Asking Questions
+                  <ArrowRight className="ml-2" size={20} />
+                </a>
+              )}
               <a href="#features" className="border border-slate-300 hover:border-slate-400 text-slate-700 font-semibold py-4 px-8 rounded-xl text-lg transition-colors">
                 Learn More
               </a>
@@ -227,10 +301,10 @@ export default function HomePage() {
                 1
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-4">
-                Ask a Question
+                Create Account
               </h3>
               <p className="text-slate-600">
-                Post your question with clear details and code examples for better responses.
+                Sign up in seconds and join our growing community of developers.
               </p>
             </div>
 
@@ -239,10 +313,10 @@ export default function HomePage() {
                 2
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-4">
-                Get Answers
+                Ask Questions
               </h3>
               <p className="text-slate-600">
-                Receive detailed answers from experienced developers in your field.
+                Post your questions with code snippets and detailed context.
               </p>
             </div>
 
@@ -251,10 +325,10 @@ export default function HomePage() {
                 3
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-4">
-                Learn & Share
+                Get Answers
               </h3>
               <p className="text-slate-600">
-                Apply what you learn and help others by answering their questions.
+                Receive expert answers and solutions from the community.
               </p>
             </div>
           </div>
@@ -265,15 +339,25 @@ export default function HomePage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
-            Ready to Join the Community?
+            Ready to Start Learning?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Start asking questions, sharing knowledge, and growing with thousands of developers
+            Join thousands of developers sharing knowledge on StackIt
           </p>
-          <a href="/signup" className="bg-white text-blue-600 hover:bg-slate-50 font-semibold py-4 px-8 rounded-xl text-lg transition-colors inline-flex items-center shadow-lg">
-            Create Your Account
-            <ArrowRight className="ml-2" size={20} />
-          </a>
+          {user ? (
+            <button
+              onClick={handleDashboard}
+              className="bg-white text-blue-600 hover:bg-blue-50 font-semibold py-4 px-8 rounded-xl text-lg transition-colors inline-flex items-center shadow-lg"
+            >
+              Go to Dashboard
+              <ArrowRight className="ml-2" size={20} />
+            </button>
+          ) : (
+            <a href="/signup" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold py-4 px-8 rounded-xl text-lg transition-colors inline-flex items-center shadow-lg">
+              Create Your Account
+              <ArrowRight className="ml-2" size={20} />
+            </a>
+          )}
         </div>
       </section>
 
@@ -282,7 +366,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4 text-blue-400">StackIt</h3>
+              <h3 className="text-2xl font-bold mb-4">StackIt</h3>
               <p className="text-slate-400">
                 A modern Q&A platform for developers to share knowledge and solve problems together.
               </p>
