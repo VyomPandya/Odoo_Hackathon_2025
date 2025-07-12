@@ -64,16 +64,16 @@ export const removeAuthToken = (): void => {
   Cookies.remove('auth-token');
 };
 
-export const getCurrentUser = (): User | null => {
-  const token = getAuthToken();
-  if (!token) return null;
-  
-  const decoded = verifyToken(token);
-  if (!decoded?.user) return null;
-  // Find the user in storage to get the password (if needed)
-  const users = getStoredUsers();
-  const user = users.find(u => u.email === decoded.user.email);
-  return user || null;
+export const getCurrentUser = async (): Promise<User | null> => {
+  const { data, error } = await supabase.auth.getSession();
+  const session = data?.session;
+  if (!session || !session.user) return null;
+  return {
+    id: session.user.id,
+    name: session.user.user_metadata?.name || '',
+    email: session.user.email || '',
+    password: '', // Do not expose password
+  };
 };
 
 export const authenticateUser = async (email: string, password: string): Promise<User | null> => {

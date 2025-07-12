@@ -25,10 +25,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing auth token on app load
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-    setLoading(false);
+    // Check for existing auth token or Supabase session on app load
+    const fetchUser = async () => {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      setLoading(false);
+    };
+    fetchUser();
   }, []);
 
   const login = (userData: User) => {
